@@ -27,9 +27,6 @@ def nearest_neighbours(test_row, train_arr, no_of_neighbours):
         distances.append((row, dist))
 
     distances.sort(key=lambda x: x[1])
-    #print("Len of total Distance:", len(distances))
-    #for i in range(len(distances)):
-    #    print(distances[i][1])
     neighbours = list()
     for i in range(no_of_neighbours):
         neighbours.append(distances[i])
@@ -38,12 +35,9 @@ def nearest_neighbours(test_row, train_arr, no_of_neighbours):
 def call_vote(weightDists, neighbours):
     votes = np.zeros(2, dtype=np.float32)
     class_values = [x[-1] for x in neighbours]
-    #print(class_values)
     for i in range(len(weightDists)):
         pred_class = class_values[i]
         votes[int(pred_class)] += weightDists[i] * 1.0
-        #print("Votes:")
-        #print(votes)
     if(votes[0] > votes[1]):
         return 0
     else:
@@ -51,7 +45,7 @@ def call_vote(weightDists, neighbours):
 
 def knn(train_arr, test_arr, no_of_neighbours):
     predictions = list()
-    #print(len(test_arr))
+
     for row in test_arr:
         neighbours = list()
         distances = np.zeros(no_of_neighbours, dtype=np.float32)
@@ -76,29 +70,40 @@ def calc_accuracy(actual_values, pred_values):
             count += 1
     return count / float(len(actual_values)) * 100.0
 
+
+def normalize(df_new):
+    return (df_new-df_new.min())/(df_new.max()-df_new.min())
+
 if __name__ == '__main__':
 
     LBW_Data = 'CleanedDataSet.csv'
+    #LBW_Data = 'normalData.csv'
     dataFrame = pd.read_csv(LBW_Data)
+    #Min-Max Normalization -> (0,1)
+    dataFrame = normalize(dataFrame)
     #features_X = np.array(dataFrame.drop('Reuslt', axis = 1))
     #labels_y = np.array(dataFrame['Reuslt'])
 
     train_arr= np.array(dataFrame)
 
     n_splits = 5
-    kf = KFold(n_splits,shuffle = True, random_state = 7)
+    heighest_accuracy = 0.0
+    summ = 0.0
+    test_seed = 0
+    kf = KFold(n_splits, shuffle = True, random_state = 376)
     folds = list()
     for train_index, test_index in kf.split(train_arr):
         train, test = train_arr[train_index], train_arr[test_index]
         folds.append((train,test))
 
 
-    no_of_neighbours = 3
+    #Basically my K.
+    no_of_neighbours = 10
 
-    accu = 0
-    graph = list()
-    neighbours = list()
-    for i in range(3,no_of_neighbours+1):
+    accu = 0.0
+    #graph = list()
+    #neighbours = list()
+    for i in range(1,no_of_neighbours+1,1):
         result = list()
         for fold in folds:
             train_arr = fold[0]
@@ -110,16 +115,16 @@ if __name__ == '__main__':
             result.append(accuracy)
 
         mean_accu = sum(result)/float(len(result))
-        graph.append(mean_accu)
-        neighbours.append(i)
+        #graph.append(mean_accu)
+        #neighbours.append(i)
         if(mean_accu > accu):
             accu = mean_accu
             optimal_neigh = i
-        #print("Neighbours:",i)
+        print("Neighbours:",i)
         print("Scores: %s" % result)
         print("Mean Accuracy: %.3f%%" % mean_accu )
 
-    #print("Optimal Neighbour", optimal_neigh)
+    print("Highest Accuracy", accu)
     #print(graph)
     #print(neighbours)
     #plt.plot(neighbours,graph)

@@ -1,6 +1,5 @@
 import pandas as pd
 import numpy as np
-from sklearn.model_selection import train_test_split
 from sklearn.model_selection import KFold
 import math
 
@@ -82,12 +81,13 @@ if __name__ == "__main__":
     data = 'CleanedDataSet.csv'
     data = pd.read_csv(data)
 
+
     data = data.drop("History", axis = 1)
 
     data = data.to_numpy()
-    n_splits = 4
+    n_splits = 2
     #for seed in range(10000):
-    kf = KFold(n_splits, shuffle = True, random_state = 3508)
+    kf = KFold(n_splits, shuffle = True, random_state = 8968)
     folds = list()
     for train_index, test_index in kf.split(data):
         train, test = data[train_index], data[test_index]
